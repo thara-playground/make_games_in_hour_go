@@ -24,12 +24,13 @@ var commandNames = []string{
 }
 
 func selectCommand(g *game) {
-	g.player().cmd = commandFight
+	player := g.player()
+	player.cmd = commandFight
 
 	for {
-		draw(g)
+		drawScreen(g)
 		for i, n := range commandNames {
-			if i == g.player().cmd {
+			if i == player.cmd {
 				fmt.Print(">")
 			} else {
 				fmt.Print(" ")
@@ -45,20 +46,23 @@ func selectCommand(g *game) {
 			return
 		}
 
-		c := g.player().cmd
-		switch char {
-		case 'w':
-			c--
-		case 's':
-			c++
-		default:
-			return
-		}
-		if c < 0 {
-			c = commandMax - 1
-		} else if commandMax <= c {
-			c = 0
-		}
-		g.player().cmd = c
+		player.cmd = moveCursor(player.cmd, char)
 	}
+}
+
+func moveCursor(c command, char rune) command {
+	switch char {
+	case 'w':
+		c--
+	case 's':
+		c++
+	default:
+		return c
+	}
+	if c < 0 {
+		c = commandMax - 1
+	} else if commandMax <= c {
+		c = 0
+	}
+	return c
 }

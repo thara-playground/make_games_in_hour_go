@@ -22,7 +22,7 @@ func (g *game) battle(m monster) {
 	g.s[statusPlayer].target = statusMonster
 	g.s[statusMonster].target = statusPlayer
 
-	draw(g)
+	drawScreen(g)
 	fmt.Printf("%s があらわれた\n", g.s[1].name)
 
 	for {
@@ -37,7 +37,7 @@ func (g *game) battle(m monster) {
 		for _, c := range g.s {
 			target := g.s[c.target]
 
-			draw(g)
+			drawScreen(g)
 			switch c.cmd {
 			case commandFight:
 				dmg := 1 + rand.Int()%c.attack
@@ -52,7 +52,7 @@ func (g *game) battle(m monster) {
 					switch c.target {
 					case statusMonster:
 						target.aa = ""
-						draw(g)
+						drawScreen(g)
 						fmt.Printf("%s をたおした!\n", target.name)
 						return
 					case statusPlayer:
@@ -75,7 +75,7 @@ func (g *game) battle(m monster) {
 				c.mp -= spellCost
 				fmt.Printf("%sのきずが かいふくした\n", c.name)
 				keyboard.GetKey()
-				draw(g)
+				drawScreen(g)
 				break
 			case commandRun:
 				fmt.Printf("%sは にげだした!\n", c.name)
@@ -90,7 +90,7 @@ func (g *game) player() *status {
 	return g.s[statusPlayer]
 }
 
-func draw(g *game) {
+func drawScreen(g *game) {
 	fmt.Print("\033[H\033[2J")
 
 	p := g.s[statusPlayer]
