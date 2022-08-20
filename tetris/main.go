@@ -25,7 +25,9 @@ func main() {
 	t := time.NewTicker(1 * time.Second)
 	defer t.Stop()
 
-	initGame()
+	var g game
+	g.init()
+	draw(&g)
 
 	ch := make(chan rune)
 	go func() {
@@ -40,91 +42,42 @@ func main() {
 	for {
 		select {
 		case <-t.C:
-			fallBlock()
+			g.fallBlock()
+			draw(&g)
 		case char := <-ch:
-			last := block
+			last := g.block
 
 			switch char {
 			case 'w':
 			case 's':
-				block.y++
+				g.block.y++
 			case 'a':
-				block.x--
+				g.block.x--
 			case 'd':
-				block.x++
+				g.block.x++
 			default:
-				rotateBlock()
+				g.rotateBlock()
 			}
 
-			if isCollided() {
-				block = last
+			if g.isBlockCollided() {
+				g.block = last
 			} else {
-				draw()
+				draw(&g)
 			}
 		}
 
 	}
 }
 
-const fieldWidth, fieldHeight = 12, 18
-
-type blockType int
-
-const (
-	blockNone blockType = iota
-	blockHard
-	blockSoft
-	blockFall
-	blockMax
-)
-
-type Field [fieldHeight][fieldWidth]blockType
-
-var field Field
-
-var defaultField = Field{
-	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-}
-
-func initGame() {
-	initBlock()
-
-	copyField(&field, &defaultField)
-	draw()
-}
-
-func copyField(dst, src *Field) {
-	for i, row := range src {
-		copy(dst[i][:], row[:])
-	}
-}
-
-func draw() {
+func draw(g *game) {
 	fmt.Print("\033[H\033[2J")
 
 	var screen Field
-	copyField(&screen, &field)
+	copyField(&screen, &g.field)
 	for y := 0; y < blockHeightMax; y++ {
 		for x := 0; x < blockWidthMax; x++ {
-			if 0 < block.shape.pattern[y][x] {
-				screen[block.y+y][block.x+x] = blockFall
+			if 0 < g.block.shape.pattern[y][x] {
+				screen[g.block.y+y][g.block.x+x] = blockFall
 			}
 		}
 	}
@@ -146,60 +99,6 @@ func draw() {
 	}
 }
 
-type blockShapeType int
-
-const (
-	blockShapeTypeI blockShapeType = iota
-	blockShapeTypeL
-	blockShapeTypeMax
-)
-
-const blockWidthMax, blockHeightMax = 4, 4
-
-type blockShape struct {
-	size    int
-	pattern [blockWidthMax][blockHeightMax]int
-}
-
-var blockShapes = [blockShapeTypeMax]blockShape{
-	{
-		size: 3,
-		pattern: [blockWidthMax][blockHeightMax]int{
-			{0, 1, 0, 0},
-			{0, 1, 0, 0},
-			{0, 1, 0, 0},
-			{0, 0, 0, 0},
-		},
-	},
-	{
-		size: 3,
-		pattern: [blockWidthMax][blockHeightMax]int{
-			{0, 1, 0, 0},
-			{0, 1, 1, 0},
-			{0, 0, 0, 0},
-			{0, 0, 0, 0},
-		},
-	},
-}
-
-type fallingBlock struct {
-	x, y  int
-	shape blockShape
-}
-
-var block fallingBlock
-
-func initBlock() {
-	block.shape = blockShapes[rand.Intn(len(blockShapes))]
-	block.x = fieldWidth/2 - block.shape.size/2
-	block.y = 0
-
-	rotateCount := rand.Intn(4)
-	for i := 0; i < rotateCount; i++ {
-		rotateBlock()
-	}
-}
-
 func waitKey() (char rune, key keyboard.Key) {
 	var err error
 	char, key, err = keyboard.GetKey()
@@ -210,86 +109,4 @@ func waitKey() (char rune, key keyboard.Key) {
 		os.Exit(0)
 	}
 	return char, key
-}
-
-func rotateBlock() {
-	rotated := block
-
-	for y := 0; y < block.shape.size; y++ {
-		for x := 0; x < block.shape.size; x++ {
-			rotated.shape.pattern[block.shape.size-1-x][y] = block.shape.pattern[y][x]
-		}
-	}
-
-	block = rotated
-}
-
-func fallBlock() {
-	last := block
-	block.y++
-	if isCollided() {
-		block = last
-		for y := 0; y < blockHeightMax; y++ {
-			for x := 0; x < blockWidthMax; x++ {
-				if 0 < block.shape.pattern[y][x] {
-					field[block.y+y][block.x+x] = blockSoft
-				}
-			}
-		}
-		eraceLine()
-
-		initBlock()
-		if isCollided() {
-			initGame()
-		}
-	}
-	draw()
-}
-
-func isCollided() bool {
-	for y := 0; y < block.shape.size; y++ {
-		for x := 0; x < block.shape.size; x++ {
-			if 0 < block.shape.pattern[y][x] {
-				globalX := block.x + x
-				globalY := block.y + y
-				if globalX < 0 || fieldWidth <= globalX ||
-					globalY < 0 || fieldHeight <= globalY ||
-					field[globalY][globalX] != blockNone {
-					return true
-				}
-			}
-		}
-	}
-	return false
-}
-
-func eraceLine() {
-	for y := 0; y < fieldHeight; y++ {
-		completed := true
-		for x := 0; x < fieldWidth; x++ {
-			if field[y][x] == blockNone {
-				completed = false
-				break
-			}
-		}
-		if completed {
-			for x := 0; x < fieldWidth; x++ {
-				if field[y][x] == blockSoft {
-					field[y][x] = blockNone
-				}
-			}
-			for x := 0; x < fieldWidth; x++ {
-				for y2 := y; 0 <= y2; y2-- {
-					if field[y2][x] == blockHard {
-						break
-					}
-					if y2 == 0 {
-						field[y2][x] = blockNone
-					} else if field[y2-1][x] != blockHard {
-						field[y2][x] = field[y2-1][x]
-					}
-				}
-			}
-		}
-	}
 }
