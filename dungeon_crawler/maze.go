@@ -31,10 +31,6 @@ type maze struct {
 	tiles [mazeHeight][mazeWidth]tile
 }
 
-func (m *maze) init() {
-	m.generateMap()
-}
-
 func (m *maze) generateMap() {
 	for y := 0; y < mazeHeight; y++ {
 		for x := 0; x < mazeWidth; x++ {

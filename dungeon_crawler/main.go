@@ -22,21 +22,31 @@ func main() {
 		}
 	}()
 
-	var m maze
-	m.init()
+	var g game
+	g.init()
 
 	for {
-		draw(&m)
-		waitKey()
+		draw(&g)
+		char, _ := waitKey()
+		switch char {
+		case 'w':
+			g.movePlayerForward()
+		case 's':
+			g.turnPlayerAround()
+		case 'a':
+			g.turnPlayerLeft()
+		case 'd':
+			g.turnPlayerRight()
+		}
 	}
 }
 
-func draw(m *maze) {
+func draw(g *game) {
 	fmt.Print("\033[H\033[2J")
 
 	for y := 0; y < mazeHeight; y++ {
 		for x := 0; x < mazeWidth; x++ {
-			if m.tiles[y][x].walls[directionNorth] {
+			if g.getTile(y, x).walls[directionNorth] {
 				fmt.Print("+--+")
 			} else {
 				fmt.Print("+  +")
@@ -46,13 +56,18 @@ func draw(m *maze) {
 
 		for x := 0; x < mazeWidth; x++ {
 			floorAA := "  "
-			if m.tiles[y][x].walls[directionWest] {
+			if g.getTile(y, x).walls[directionWest] {
 				fmt.Print("|")
 			} else {
 				fmt.Print(" ")
 			}
+
+			if g.isPlayerExist(y, x) {
+				floorAA = playerDirections[g.player.direction]
+			}
+
 			fmt.Print(floorAA)
-			if m.tiles[y][x].walls[directionEast] {
+			if g.getTile(y, x).walls[directionEast] {
 				fmt.Print("|")
 			} else {
 				fmt.Print(" ")
@@ -61,7 +76,7 @@ func draw(m *maze) {
 		fmt.Println()
 
 		for x := 0; x < mazeWidth; x++ {
-			if m.tiles[y][x].walls[directionSouth] {
+			if g.getTile(y, x).walls[directionSouth] {
 				fmt.Print("+--+")
 			} else {
 				fmt.Print("+  +")
@@ -81,4 +96,11 @@ func waitKey() (char rune, key keyboard.Key) {
 		os.Exit(0)
 	}
 	return char, key
+}
+
+var playerDirections = [directionMax]string{
+	"^^",
+	"<<",
+	"vv",
+	">>",
 }
