@@ -26,7 +26,11 @@ func main() {
 	g.init()
 
 	for {
+		fmt.Print("\033[H\033[2J")
+
+		draw3d(&g)
 		draw(&g)
+
 		char, _ := waitKey()
 		switch char {
 		case 'w':
@@ -41,8 +45,63 @@ func main() {
 	}
 }
 
+func draw3d(g *game) {
+	var screen = `
+         
+         
+         
+         
+         
+         
+         
+         `
+	screenBuffer := []rune(screen)
+
+	for i := 0; i < locationMax; i++ {
+		pos := g.player.pos.add(locations[g.player.direction][i])
+		if !isInsideMaze(pos) {
+			continue
+		}
+		for j := 0; j < directionMax; j++ {
+			relatedDirection := (directionMax + j - g.player.direction) % directionMax
+			if !g.maze.tiles[pos.y][pos.x].walls[j] {
+				continue
+			}
+			if len(aaTable[i][relatedDirection]) == 0 {
+				continue
+			}
+			for k := range screenBuffer {
+				runes := []rune(aaTable[i][relatedDirection])
+				if runes[k] != ' ' && runes[k] != '\n' {
+					screenBuffer[k] = runes[k]
+				}
+			}
+		}
+	}
+
+	for _, c := range screenBuffer {
+		switch c {
+		case ' ':
+			fmt.Print("　")
+		case '#':
+			fmt.Print("　")
+		case '_':
+			fmt.Print("＿")
+		case '|':
+			fmt.Print("｜")
+		case '/':
+			fmt.Print("／")
+		case 'L':
+			fmt.Print("＼")
+		default:
+			fmt.Print(string(c))
+		}
+	}
+	fmt.Println()
+	fmt.Println()
+}
+
 func draw(g *game) {
-	fmt.Print("\033[H\033[2J")
 
 	for y := 0; y < mazeHeight; y++ {
 		for x := 0; x < mazeWidth; x++ {
