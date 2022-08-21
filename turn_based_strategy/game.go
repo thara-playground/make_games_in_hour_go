@@ -9,7 +9,8 @@ type game struct {
 
 	turnOrder [castleMax]castleID
 
-	playerLord lordID
+	playerCastle castleID
+	playerLord   lordID
 
 	castles [castleMax]castle
 }
@@ -89,6 +90,7 @@ func (g *game) init() {
 }
 
 func (g *game) setPlayerCastle(c castleID) {
+	g.playerCastle = c
 	g.playerLord = g.castles[c].owner
 }
 
@@ -100,16 +102,31 @@ func (g *game) castleLord(c castleID) lord {
 	return lords[g.castles[c].owner]
 }
 
+func (g *game) lord(l lordID) lord {
+	return lords[l]
+}
+
 func (g *game) PlayerLord() lord {
 	return lords[g.playerLord]
 }
 
 func (g *game) PlayerCastle() castle {
-	return g.castles[g.playerLord]
+	return g.castles[g.playerCastle]
 }
 
 func (g *game) isPlayerCastle(c castleID) bool {
 	return g.castles[c].owner == g.playerLord
+}
+
+func (g *game) getPlayerTroopMax(targetCastle castleID) int {
+	troopMax := g.PlayerCastle().troopCount
+	if g.isPlayerCastle(targetCastle) {
+		cap := troopMax - g.castle(targetCastle).troopCount
+		if cap < troopMax {
+			troopMax = cap
+		}
+	}
+	return troopMax
 }
 
 func (g *game) advance(from, to castleID, troopCount int) {
@@ -117,4 +134,28 @@ func (g *game) advance(from, to castleID, troopCount int) {
 	if g.castles[to].owner == g.playerLord {
 		g.castles[to].troopCount += troopCount
 	}
+}
+
+type siegeResult int
+
+const (
+	siegeResultNone siegeResult = iota
+	siegeResultWin
+	siegeResultLose
+)
+
+func (g *game) processSiege(offence lordID, target castleID, offensiveTroopCount *int) (bool, siegeResult) {
+	if rand.Intn(2) == 0 {
+		g.castles[target].troopCount--
+	} else {
+		*offensiveTroopCount--
+	}
+	if *offensiveTroopCount <= 0 {
+		return true, siegeResultLose
+	} else if g.castles[target].troopCount <= 0 {
+		g.castles[target].owner = offence
+		g.castles[target].troopCount = *offensiveTroopCount
+		return true, siegeResultWin
+	}
+	return false, siegeResultNone
 }
