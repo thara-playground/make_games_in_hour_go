@@ -1,26 +1,26 @@
 package main
 
-type lord int
+type lordID int
 
 const (
-	lordDate      lord = iota // 伊達輝宗
-	lordUesugi                // 上杉謙信
-	lordTakeda                // 武田信玄
-	lordHojo                  // 北条氏政
-	lordTokugawa              // 徳川家康
-	lordOda                   // 織田信長
-	lordAshikaga              // 足利義昭
-	lordMori                  // 毛利元就
-	lordChosokabe             // 長宗我部元親
-	lordSimazu                // 島津義久
+	lordDate      lordID = iota // 伊達輝宗
+	lordUesugi                  // 上杉謙信
+	lordTakeda                  // 武田信玄
+	lordHojo                    // 北条氏政
+	lordTokugawa                // 徳川家康
+	lordOda                     // 織田信長
+	lordAshikaga                // 足利義昭
+	lordMori                    // 毛利元就
+	lordChosokabe               // 長宗我部元親
+	lordSimazu                  // 島津義久
 	lordMax
 )
 
-type load struct {
+type lord struct {
 	familyName, firstName string
 }
 
-var lords = [lordMax]load{
+var lords = [lordMax]lord{
 	{"伊達", "輝宗"},
 	{"上杉", "謙信"},
 	{"武田", "信玄"},
@@ -52,7 +52,7 @@ const (
 
 type castle struct {
 	name       string
-	owner      lord
+	owner      lordID
 	troopCount int
 
 	connectedCastles []castleID

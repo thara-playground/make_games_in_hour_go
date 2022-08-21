@@ -9,7 +9,7 @@ type game struct {
 
 	turnOrder [castleMax]castleID
 
-	playerLord lord
+	playerLord lordID
 
 	castles [castleMax]castle
 }
@@ -96,11 +96,11 @@ func (g *game) castle(c castleID) castle {
 	return g.castles[c]
 }
 
-func (g *game) castleLord(c castleID) load {
+func (g *game) castleLord(c castleID) lord {
 	return lords[g.castles[c].owner]
 }
 
-func (g *game) PlayerLord() load {
+func (g *game) PlayerLord() lord {
 	return lords[g.playerLord]
 }
 

@@ -249,6 +249,10 @@ func selectCommand(g *game, currentCastle castleID) {
 	}
 }
 
+func siege(offence lordID, troopCount int, target castleID) {
+
+}
+
 func waitKey() (char rune, key keyboard.Key) {
 	var err error
 	char, key, err = keyboard.GetKey()
