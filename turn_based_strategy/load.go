@@ -1,26 +1,26 @@
 package main
 
-type loadID int
+type lord int
 
 const (
-	loadDate      loadID = iota // 伊達輝宗
-	loadUesugi                  // 上杉謙信
-	loadTakeda                  // 武田信玄
-	loadHojo                    // 北条氏政
-	loadTokugawa                // 徳川家康
-	loadOda                     // 織田信長
-	loadAshikaga                // 足利義昭
-	loadMori                    // 毛利元就
-	loadChosokabe               // 長宗我部元親
-	loadSimazu                  // 島津義久
-	loadMax
+	lordDate      lord = iota // 伊達輝宗
+	lordUesugi                // 上杉謙信
+	lordTakeda                // 武田信玄
+	lordHojo                  // 北条氏政
+	lordTokugawa              // 徳川家康
+	lordOda                   // 織田信長
+	lordAshikaga              // 足利義昭
+	lordMori                  // 毛利元就
+	lordChosokabe             // 長宗我部元親
+	lordSimazu                // 島津義久
+	lordMax
 )
 
 type load struct {
 	familyName, firstName string
 }
 
-var loads = [loadMax]load{
+var lords = [lordMax]load{
 	{"伊達", "輝宗"},
 	{"上杉", "謙信"},
 	{"武田", "信玄"},
@@ -33,7 +33,7 @@ var loads = [loadMax]load{
 	{"島津", "義久"},
 }
 
-type castleID int
+type castleID = int
 
 const (
 	castleYonezawa        castleID = iota // 米沢城
@@ -52,62 +52,12 @@ const (
 
 type castle struct {
 	name       string
-	owner      loadID
+	owner      lord
 	troopCount int
+
+	connectedCastles []castleID
 }
 
 const troopBase = 5
-
-var castles = [castleMax]castle{
-
-	{
-		name:       "米沢城",
-		owner:      loadDate,
-		troopCount: troopBase,
-	},
-	{
-		name:       "春日山城",
-		owner:      loadUesugi,
-		troopCount: troopBase,
-	},
-	{
-		name:       "躑躅ヶ崎館",
-		owner:      loadTakeda,
-		troopCount: troopBase,
-	},
-	{
-		name:       "小田原城",
-		owner:      loadHojo,
-		troopCount: troopBase,
-	},
-	{
-		name:       "岡崎城",
-		owner:      loadTokugawa,
-		troopCount: troopBase,
-	},
-	{
-		name:       "岐阜城",
-		owner:      loadOda,
-		troopCount: troopBase,
-	},
-	{
-		name:       "二条城",
-		owner:      loadAshikaga,
-		troopCount: troopBase,
-	},
-	{
-		name:       "吉田郡山城",
-		owner:      loadMori,
-		troopCount: troopBase,
-	},
-	{
-		name:       "岡豊城",
-		owner:      loadChosokabe,
-		troopCount: troopBase,
-	},
-	{
-		name:       "内城",
-		owner:      loadSimazu,
-		troopCount: troopBase,
-	},
-}
+const troopMax = 9000
+const troopUnit = 1000
