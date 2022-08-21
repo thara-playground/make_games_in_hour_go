@@ -23,6 +23,7 @@ func main() {
 		}
 	}()
 
+start:
 	var g game
 	g.init()
 	draw(&g)
@@ -51,15 +52,21 @@ func main() {
 			fmt.Println()
 
 			if g.isPlayerCastle(currentCastle) {
-				selectPlayerCommand(&g)
+				selectPlayerCommand(&g, currentCastle)
 			} else {
 				processAICommand(&g, currentCastle)
 			}
 
 			waitKey()
+
+			if g.getCastleCount(g.playerLord) <= 0 {
+				drawGameOver(&g)
+				waitKey()
+				goto start
+			}
 		}
 
-		g.year++
+		g.turnEnd()
 	}
 }
 
@@ -107,7 +114,7 @@ func draw(g *game) {
 		g.castle(castleTsutsujigasaki).troopCount,
 	)
 	fmt.Printf("〜〜〜〜〜〜〜〜〜〜〜〜〜　　　　　　%.2s　　　〜〜〜\n",
-		g.castleLord(castleYonezawa).familyName,
+		g.castleLord(castleTsutsujigasaki).familyName,
 	)
 	fmt.Printf("〜〜〜〜〜〜　　　　　　　%d%.2s%d　　　　　　　　〜〜〜\n",
 		castleGifu,
@@ -162,6 +169,7 @@ func selectCastle(g *game) {
 		"どこに　ありまするか？！（0〜%d）\n",
 		castleMax-1)
 
+	var selectedCastle castleID
 	for {
 		char, _ := waitKey()
 		selected, err := strconv.Atoi(string(char))
@@ -172,33 +180,35 @@ func selectCastle(g *game) {
 		}
 
 		g.setPlayerCastle(selected)
+		selectedCastle = selected
 
 		break
 	}
 
 	fmt.Printf("%sさま、%sから　てんかとういつを\nめざしましょうぞ！\n",
-		g.PlayerLord().firstName,
-		g.PlayerCastle().name,
+		g.castleLord(selectedCastle).firstName,
+		g.castle(selectedCastle).name,
 	)
 }
 
-func selectPlayerCommand(g *game) {
+func selectPlayerCommand(g *game, currentCastle castleID) {
 	fmt.Printf("%sさま、どこに　しんぐん　しますか？\n",
 		g.PlayerLord().firstName)
-	for i, c := range g.PlayerCastle().connectedCastles {
-		fmt.Printf("%d %s\n", i, g.castle(c).name)
+	for _, c := range g.castle(currentCastle).connectedCastles {
+		fmt.Printf("%d %s\n", c, g.castle(c).name)
 	}
 	fmt.Println()
 
 	char, _ := waitKey()
 	targetCastle, err := strconv.Atoi(string(char))
 	if err != nil {
+		fmt.Println("skip:", char, string(char), err)
 		return
 	}
 
 	isConnected := false
-	for i := range g.PlayerCastle().connectedCastles {
-		if i == targetCastle {
+	for _, c := range g.castle(currentCastle).connectedCastles {
+		if c == targetCastle {
 			isConnected = true
 			break
 		}
@@ -208,7 +218,7 @@ func selectPlayerCommand(g *game) {
 		return
 	}
 
-	troopMax := g.getPlayerTroopMax(targetCastle)
+	troopMax := g.getPlayerTroopMax(currentCastle, targetCastle)
 
 	fmt.Printf("%sに　なんぜんにん　しんぐん　しますか？（0〜%d）\n",
 		g.castle(targetCastle).name,
@@ -228,7 +238,7 @@ func selectPlayerCommand(g *game) {
 		break
 	}
 
-	g.advance(g.playerCastle, targetCastle, troopCount)
+	g.advance(currentCastle, targetCastle, troopCount)
 
 	fmt.Println()
 
@@ -274,6 +284,8 @@ func processAICommand(g *game, currentCastle castleID) {
 func siege(g *game, offence lordID, troopCount int, target castleID) {
 	fmt.Print("\033[H\033[2J")
 
+	fmt.Printf("〜%sの　たたかい〜\n\n", g.castle(target).name)
+
 	defense := g.castleLord(target)
 
 	var result siegeResult
@@ -284,14 +296,13 @@ func siege(g *game, offence lordID, troopCount int, target castleID) {
 			defense.familyName,
 			g.castle(target).troopCount*troopUnit,
 		)
+		waitKey()
 
 		var finished bool
 		finished, result = g.processSiege(offence, target, &troopCount)
 		if finished {
 			break
 		}
-
-		waitKey()
 	}
 
 	switch result {
@@ -313,6 +324,12 @@ func siege(g *game, offence lordID, troopCount int, target castleID) {
 	}
 
 	fmt.Println()
+}
+
+func drawGameOver(g *game) {
+	draw(g)
+	fmt.Println("ＧＡＭＥ　ＯＶＥＲ")
+	fmt.Println(g.chronology)
 }
 
 func waitKey() (char rune, key keyboard.Key) {
