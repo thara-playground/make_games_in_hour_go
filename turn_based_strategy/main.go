@@ -5,7 +5,6 @@ import (
 	"log"
 	"math/rand"
 	"os"
-	"sort"
 	"strconv"
 	"time"
 
@@ -54,7 +53,7 @@ func main() {
 			if g.isPlayerCastle(currentCastle) {
 				selectPlayerCommand(&g)
 			} else {
-				selectAICommand(&g, currentCastle)
+				processAICommand(&g, currentCastle)
 			}
 
 			waitKey()
@@ -248,92 +247,27 @@ func selectPlayerCommand(g *game) {
 	}
 }
 
-func selectAICommand(g *game, currentCastle castleID) {
-	var enemyCastles []castleID
-	for _, c := range g.castle(currentCastle).connectedCastles {
-		if g.castle(c).owner != g.castle(currentCastle).owner {
-			enemyCastles = append(enemyCastles, c)
-		}
-	}
-	if 0 < len(enemyCastles) {
-		sort.Slice(enemyCastles, func(i, j int) bool {
-			return g.castle(i).troopCount < g.castle(j).troopCount
-		})
+func processAICommand(g *game, currentCastle castleID) {
+	command, targetCastle, troopCount := processAI(g, currentCastle)
+	switch command {
+	case aiCommandAdvanceEnemyCastle:
+		fmt.Printf("%sの　%s%sが　%sに　せめこみました！\n",
+			g.castle(currentCastle).name,
+			g.castleLord(currentCastle).familyName,
+			g.castleLord(currentCastle).firstName,
+			g.castle(targetCastle).name)
+		waitKey()
 
-		for 1 < len(enemyCastles) &&
-			g.castle(enemyCastles[0]).troopCount < g.castle(enemyCastles[len(enemyCastles)-1]).troopCount {
-			enemyCastles = enemyCastles[:len(enemyCastles)-1]
-		}
+		siege(g, g.castle(currentCastle).owner, troopCount, targetCastle)
 
-		targetCastle := enemyCastles[rand.Intn(len(enemyCastles))]
+	case aiCommandAdvanceFrontCastle:
+		g.advance(currentCastle, targetCastle, troopCount)
 
-		if troopBase <= g.castle(currentCastle).troopCount ||
-			g.castle(targetCastle).troopCount*2 <= g.castle(currentCastle).troopCount-1 {
-
-			troopCount := g.castle(currentCastle).troopCount - 1
-			if troopCount < 0 {
-				troopCount = 0
-			}
-			g.advance(currentCastle, targetCastle, troopCount)
-
-			fmt.Printf("%sの　%s%sが　%sに　せめこみました！\n",
-				g.castle(currentCastle).name,
-				g.castleLord(currentCastle).familyName,
-				g.castleLord(currentCastle).firstName,
-				g.castle(targetCastle).name)
-
-			waitKey()
-
-			siege(g, g.castle(currentCastle).owner, troopCount, targetCastle)
-		}
-	} else {
-		var frontCastles []castleID
-		for _, n := range g.castle(currentCastle).connectedCastles {
-			for _, nn := range g.castle(n).connectedCastles {
-				if g.castle(nn).owner == g.castle(n).owner {
-					frontCastles = append(frontCastles, n)
-				}
-			}
-		}
-		var dest []castleID
-		if len(frontCastles) == 0 {
-			dest = g.castle(currentCastle).connectedCastles
-		} else {
-			dest = frontCastles
-		}
-		sort.Slice(dest, func(i, j int) bool {
-			return g.castle(dest[i]).troopCount < g.castle(dest[j]).troopCount
-		})
-		for 1 < len(dest) &&
-			g.castle(dest[0]).troopCount < g.castle(dest[len(dest)-1]).troopCount {
-			dest = dest[:len(dest)-1]
-		}
-
-		targetCastle := dest[rand.Intn(len(dest))]
-
-		sendTroopCount := troopMax - g.castle(targetCastle).troopCount
-
-		if 0 < len(frontCastles) {
-			nTroops := g.castle(currentCastle).troopCount
-			if nTroops < sendTroopCount {
-				sendTroopCount = nTroops
-			}
-		} else {
-			nTroops := g.castle(currentCastle).troopCount - (troopBase - 1)
-			if nTroops < sendTroopCount {
-				sendTroopCount = nTroops
-			}
-		}
-
-		if 0 < sendTroopCount {
-			g.advance(currentCastle, targetCastle, sendTroopCount)
-
-			fmt.Printf("%sから　%sに　%dにん　いどうしました\n",
-				g.castle(currentCastle).name,
-				g.castle(targetCastle).name,
-				sendTroopCount*troopUnit,
-			)
-		}
+		fmt.Printf("%sから　%sに　%dにん　いどうしました\n",
+			g.castle(currentCastle).name,
+			g.castle(targetCastle).name,
+			troopCount*troopUnit,
+		)
 	}
 }
 
