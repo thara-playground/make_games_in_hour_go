@@ -3,6 +3,8 @@ package main
 type game struct {
 	maze   maze
 	player character
+
+	goalX, goalY int
 }
 
 func (g *game) init() {
@@ -10,6 +12,9 @@ func (g *game) init() {
 
 	g.player.pos = vec2{x: 0, y: 0}
 	g.player.direction = directionNorth
+
+	g.goalX = mazeWidth - 1
+	g.goalY = mazeHeight - 1
 }
 
 func (g *game) getTile(y, x int) tile {
@@ -18,6 +23,10 @@ func (g *game) getTile(y, x int) tile {
 
 func (g *game) isPlayerExist(y, x int) bool {
 	return g.player.pos.y == y && g.player.pos.x == x
+}
+
+func (g *game) isGoal(y, x int) bool {
+	return g.goalX == x && g.goalY == y
 }
 
 func (g *game) movePlayerForward() {
@@ -42,4 +51,8 @@ func (g *game) turnPlayerRight() {
 func (g *game) turnPlayerAround() {
 	g.player.direction += 2
 	g.player.direction = (g.player.direction + directionMax) % directionMax
+}
+
+func (g *game) isReachedGoal() bool {
+	return g.player.pos.x == g.goalX && g.player.pos.y == g.goalY
 }

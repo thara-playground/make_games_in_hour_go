@@ -28,6 +28,13 @@ func main() {
 	for {
 		fmt.Print("\033[H\033[2J")
 
+		if g.isReachedGoal() {
+			drawEnding(&g)
+			waitKey()
+			g.init()
+			continue
+		}
+
 		draw3d(&g)
 		draw(&g)
 
@@ -123,6 +130,8 @@ func draw(g *game) {
 
 			if g.isPlayerExist(y, x) {
 				floorAA = playerDirections[g.player.direction]
+			} else if g.isGoal(y, x) {
+				floorAA = "G "
 			}
 
 			fmt.Print(floorAA)
@@ -143,6 +152,18 @@ func draw(g *game) {
 		}
 		fmt.Println()
 	}
+}
+
+func drawEnding(g *game) {
+	fmt.Printf("　＊　＊　ＣＯＮＧＲＡＴＵＬＡＴＩＯＮＳ　＊　＊\n" +
+		"\n" +
+		"　あなたはついに　でんせつのまよけを　てにいれた！\n" +
+		"\n" +
+		"　しかし、くらくをともにした　「なかま」という\n" +
+		"かけがえのない　たからをてにした　あなたにとって、\n" +
+		"まよけのかがやきも　いろあせて　みえるのであった…\n" +
+		"\n" +
+		"　　　　　　　〜　ＴＨＥ　ＥＮＤ　〜\n")
 }
 
 func waitKey() (char rune, key keyboard.Key) {
