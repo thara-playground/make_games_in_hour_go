@@ -39,7 +39,6 @@ func processAI(g *game, currentCastle castleID) (command aiCommand, targetCastle
 			if troopCount < 0 {
 				troopCount = 0
 			}
-			g.advance(currentCastle, targetCastle, troopCount)
 
 			command = aiCommandAdvanceEnemyCastle
 			return

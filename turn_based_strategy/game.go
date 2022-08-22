@@ -131,9 +131,11 @@ func (g *game) getPlayerTroopMax(currentCastle, targetCastle castleID) int {
 
 func (g *game) advance(from, to castleID, troopCount int) {
 	g.castles[from].troopCount -= troopCount
-	if g.castles[to].owner == g.playerLord {
-		g.castles[to].troopCount += troopCount
-	}
+}
+
+func (g *game) sendTroops(from, to castleID, troopCount int) {
+	g.castles[from].troopCount -= troopCount
+	g.castles[to].troopCount += troopCount
 }
 
 type siegeResult int
@@ -159,7 +161,7 @@ func (g *game) processSiege(offence lordID, target castleID, offensiveTroopCount
 		g.castles[target].owner = offence
 		g.castles[target].troopCount = *offensiveTroopCount
 
-		if g.getCastleCount(g.castle(target).owner) <= 0 {
+		if g.getCastleCount(defense) <= 0 {
 			g.chronology += fmt.Sprintf("%dねん　%s%sが　%sで　%s%sを　ほろぼす\n",
 				g.year,
 				g.lord(offence).familyName,

@@ -242,11 +242,10 @@ func selectPlayerCommand(g *game, currentCastle castleID) {
 		break
 	}
 
-	g.advance(currentCastle, targetCastle, troopCount)
-
 	fmt.Println()
 
 	if g.isPlayerCastle(targetCastle) {
+		g.sendTroops(currentCastle, targetCastle, troopCount)
 		fmt.Printf("%sに　%dにん　いどう　しました",
 			g.castle(targetCastle).name,
 			troopCount*troopUnit,
@@ -257,6 +256,8 @@ func selectPlayerCommand(g *game, currentCastle castleID) {
 			troopCount*troopUnit,
 		)
 		waitKey()
+
+		g.advance(currentCastle, targetCastle, troopCount)
 		siege(g, g.playerLord, troopCount, targetCastle)
 	}
 }
@@ -272,10 +273,11 @@ func processAICommand(g *game, currentCastle castleID) {
 			g.castle(targetCastle).name)
 		waitKey()
 
+		g.advance(currentCastle, targetCastle, troopCount)
 		siege(g, g.castle(currentCastle).owner, troopCount, targetCastle)
 
 	case aiCommandAdvanceFrontCastle:
-		g.advance(currentCastle, targetCastle, troopCount)
+		g.sendTroops(currentCastle, targetCastle, troopCount)
 
 		fmt.Printf("%sから　%sに　%dにん　いどうしました\n",
 			g.castle(currentCastle).name,
