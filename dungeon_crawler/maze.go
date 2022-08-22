@@ -32,9 +32,9 @@ type maze struct {
 }
 
 func (m *maze) generateMap() {
-	for y := 0; y < mazeHeight; y++ {
-		for x := 0; x < mazeWidth; x++ {
-			for i := 0; i < directionMax; i++ {
+	for y, row := range m.tiles {
+		for x, tile := range row {
+			for i := range tile.walls {
 				m.tiles[y][x].walls[i] = true
 			}
 		}
@@ -46,7 +46,7 @@ func (m *maze) generateMap() {
 
 	for {
 		var canDigDirections []direction
-		for i := 0; i < directionMax; i++ {
+		for i := range directions {
 			if m.canDigWall(currentPos, i) {
 				canDigDirections = append(canDigDirections, i)
 			}

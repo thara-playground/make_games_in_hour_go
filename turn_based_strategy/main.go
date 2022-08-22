@@ -32,9 +32,9 @@ start:
 	waitKey()
 
 	for {
-		for i := 0; i < int(castleMax); i++ {
+		for i := range g.castles {
 			draw(&g)
-			for j := 0; j < int(castleMax); j++ {
+			for j := range g.castles {
 				if j == i {
 					fmt.Print(" >")
 				} else {
@@ -207,7 +207,6 @@ func selectPlayerCommand(g *game, currentCastle castleID) {
 	char, _ := waitKey()
 	targetCastle, err := strconv.Atoi(string(char))
 	if err != nil {
-		fmt.Println("skip:", char, string(char), err)
 		return
 	}
 

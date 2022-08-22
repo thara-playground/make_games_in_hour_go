@@ -58,6 +58,69 @@ type castle struct {
 	connectedCastles []castleID
 }
 
+var castles = [castleMax]castle{
+	{
+		name:             "米沢城",
+		owner:            lordDate,
+		troopCount:       troopBase,
+		connectedCastles: []castleID{castleKasugayama, castleOdawara},
+	},
+	{
+		name:             "春日山城",
+		owner:            lordUesugi,
+		troopCount:       troopBase,
+		connectedCastles: []castleID{castleYonezawa, castleTsutsujigasaki, castleGifu},
+	},
+	{
+		name:             "躑躅ヶ崎館",
+		owner:            lordTakeda,
+		troopCount:       troopBase,
+		connectedCastles: []castleID{castleKasugayama, castleOdawara, castleOkazaki},
+	},
+	{
+		name:             "小田原城",
+		owner:            lordHojo,
+		troopCount:       troopBase,
+		connectedCastles: []castleID{castleYonezawa, castleTsutsujigasaki, castleOkazaki},
+	},
+	{
+		name:             "岡崎城",
+		owner:            lordTokugawa,
+		troopCount:       troopBase,
+		connectedCastles: []castleID{castleTsutsujigasaki, castleOdawara, castleGifu},
+	},
+	{
+		name:             "岐阜城",
+		owner:            lordOda,
+		troopCount:       troopBase,
+		connectedCastles: []castleID{castleKasugayama, castleOkazaki, castleNijo},
+	},
+	{
+		name:             "二条城",
+		owner:            lordAshikaga,
+		troopCount:       troopBase,
+		connectedCastles: []castleID{castleGifu, castleYoshidakoriyama, castleOko},
+	},
+	{
+		name:             "吉田郡山城",
+		owner:            lordMori,
+		troopCount:       troopBase,
+		connectedCastles: []castleID{castleNijo, castleOko, castleUchi},
+	},
+	{
+		name:             "岡豊城",
+		owner:            lordChosokabe,
+		troopCount:       troopBase,
+		connectedCastles: []castleID{castleNijo, castleYoshidakoriyama, castleUchi},
+	},
+	{
+		name:             "内城",
+		owner:            lordSimazu,
+		troopCount:       troopBase,
+		connectedCastles: []castleID{castleYoshidakoriyama, castleOko},
+	},
+}
+
 const troopBase = 5
 const troopMax = 9000
 const troopUnit = 1000
