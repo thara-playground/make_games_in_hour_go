@@ -70,7 +70,8 @@ start:
 			}
 		}
 
-		g.turnEnd()
+		ev := g.turnEnd()
+		processEvent(ev)
 	}
 }
 
@@ -332,6 +333,24 @@ func siege(g *game, offence lordID, troopCount int, target castleID) {
 	fmt.Println()
 }
 
+func processEvent(ev event) {
+	switch ev {
+	case eventHonnoujinhHen:
+		fmt.Printf(`
+明智光秀「てきは　本能寺に　あり！\n
+\n
+明智光秀が　本能寺の　織田信長を　しゅうげきした！\n
+\n
+織田信長「ぜひに　およばず…\n
+\n
+織田信長は　本能寺に　ひをはなち　じがいした！\n
+\n
+ごじつ、羽柴秀吉が　山崎のたたかいで　明智光秀を　たおし、\n
+織田けの　こうけいの　ちいを　さんだつした！\n`)
+	}
+	waitKey()
+}
+
 func drawGameOver(g *game) {
 	draw(g)
 	fmt.Println("ＧＡＭＥ　ＯＶＥＲ")
@@ -346,12 +365,12 @@ func drawGameClear(g *game) {
 		"\n"+
 		"ＴＨＥ　ＥＮＤ",
 		g.year+3,
-		lords[g.playerLord].familyName,
-		lords[g.playerLord].firstName,
+		g.lord(g.playerLord).familyName,
+		g.lord(g.playerLord).firstName,
 		g.year+3,
-		lords[g.playerLord].familyName,
-		lords[g.playerLord].firstName,
-		lords[g.playerLord].familyName,
+		g.lord(g.playerLord).familyName,
+		g.lord(g.playerLord).firstName,
+		g.lord(g.playerLord).familyName,
 	)
 }
 

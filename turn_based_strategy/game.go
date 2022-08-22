@@ -15,6 +15,7 @@ type game struct {
 	playerLord lordID
 
 	castles [castleMax]castle
+	lords   [lordMax]lord
 
 	chronology string
 }
@@ -92,6 +93,7 @@ func (g *game) init() {
 			connectedCastles: []castleID{castleYoshidakoriyama, castleOko},
 		},
 	}
+	copy(g.lords[:], lords[:])
 }
 
 func (g *game) setPlayerCastle(c castleID) {
@@ -103,15 +105,15 @@ func (g *game) castle(c castleID) castle {
 }
 
 func (g *game) castleLord(c castleID) lord {
-	return lords[g.castles[c].owner]
+	return g.lords[g.castles[c].owner]
 }
 
 func (g *game) lord(l lordID) lord {
-	return lords[l]
+	return g.lords[l]
 }
 
 func (g *game) PlayerLord() lord {
-	return lords[g.playerLord]
+	return g.lords[g.playerLord]
 }
 
 func (g *game) isPlayerCastle(c castleID) bool {
@@ -177,7 +179,14 @@ func (g *game) processSiege(offence lordID, target castleID, offensiveTroopCount
 	return false, siegeResultNone
 }
 
-func (g *game) turnEnd() {
+type event int
+
+const (
+	eventNone event = iota
+	eventHonnoujinhHen
+)
+
+func (g *game) turnEnd() event {
 	for i, c := range g.castles {
 		if c.troopCount < troopBase {
 			g.castles[i].troopCount++
@@ -186,6 +195,19 @@ func (g *game) turnEnd() {
 		}
 	}
 	g.year++
+
+	// if g.year == 1582 && g.castles[castleNijo].owner == lordOda {
+	if g.year == 1574 && g.castles[castleNijo].owner == lordOda {
+		g.honnoujinhHen()
+		return eventHonnoujinhHen
+	}
+
+	return eventNone
+}
+
+func (g *game) honnoujinhHen() {
+	g.lords[lordOda].familyName = "羽柴"
+	g.lords[lordOda].firstName = "秀吉"
 }
 
 func (g *game) getCastleCount(lord lordID) int {
