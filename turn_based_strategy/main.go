@@ -63,6 +63,10 @@ start:
 				drawGameOver(&g)
 				waitKey()
 				goto start
+			} else if castleMax <= g.getCastleCount(g.playerLord) {
+				drawGameClear(&g)
+				waitKey()
+				goto start
 			}
 		}
 
@@ -330,6 +334,23 @@ func drawGameOver(g *game) {
 	draw(g)
 	fmt.Println("ＧＡＭＥ　ＯＶＥＲ")
 	fmt.Println(g.chronology)
+}
+
+func drawGameClear(g *game) {
+	draw(g)
+	fmt.Println(g.chronology)
+	fmt.Printf("%dねん　%s%sが　せいいたいしょうぐんに　にんぜられる\n"+
+		"%dねん　%s%sが　%sばくふを　ひらく\n"+
+		"\n"+
+		"ＴＨＥ　ＥＮＤ",
+		g.year+3,
+		lords[g.playerLord].familyName,
+		lords[g.playerLord].firstName,
+		g.year+3,
+		lords[g.playerLord].familyName,
+		lords[g.playerLord].firstName,
+		lords[g.playerLord].familyName,
+	)
 }
 
 func waitKey() (char rune, key keyboard.Key) {
